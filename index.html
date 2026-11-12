@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ספר המתכונים של נילי</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --primary: #2b6cb0;
+            --primary-hover: #2c5282;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .header-text {
+            flex: 1 1 600px;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        header h2 {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .file-upload-btn {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: background-color 0.2s;
+            display: inline-block;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        .file-upload-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary);
+        }
+
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cat-btn {
+            background-color: var(--card-bg);
+            border: 1.5px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .cat-btn:hover {
+            filter: brightness(0.96);
+        }
+
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .recipe-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top-width: 4px;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .recipe-category-badge {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            align-self: flex-start;
+        }
+
+        .recipe-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .recipe-preview {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* תצוגת מתכון מלא (Modal) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border-top: 6px solid var(--primary);
+            max-width: 650px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: var(--text-main);
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+            padding-left: 30px;
+            color: var(--text-main);
+        }
+
+        .modal-body {
+            white-space: pre-wrap;
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-text">
+            <h1>ספר המתכונים של נילי</h1>
+            <h2>ברוכים הבאים לספר המתכונים המאוגד של נילי. ספר זה מרכז את המתכונים הביתיים, האהובים והעשירים של נילי, כפי שנכתבו ונשמרו בכתב יד. המתכונים בספר זה מביאים עמם את הניחוחות, הזיכרונות והטעמים של המטבח הביתי החם, תוך ארגון מחדש במבנה מודרני, ברור ומדויק.</h2>
+        </div>
+        <label class="file-upload-btn">
+            טען קובץ מתכונים (.txt / .md)
+            <input type="file" id="fileInput" accept=".txt,.md">
+        </label>
+    </header>
+
+    <div class="controls">
+        <input type="text" id="searchInput" class="search-box" placeholder="חיפוש לפי שם מתכון או מצרכים...">
+        <div class="categories" id="categoriesContainer"></div>
+    </div>
+
+    <div class="recipes-grid" id="recipesGrid"></div>
+</div>
+
+<!-- חלון צפייה במתכון -->
+<div class="modal-overlay" id="recipeModal">
+    <div class="modal-content" id="modalContent">
+        <button class="close-btn" id="closeModal" title="סגור">&times;</button>
+        <span class="recipe-category-badge" id="modalCategory"></span>
+        <h2 class="modal-title" id="modalTitle"></h2>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+    let allRecipes = [];
+    let currentCategory = 'הכל';
+    let searchQuery = '';
+    let categoryColorMap = {};
+
+    // פלטת צבעים נעימה וקריאה לקטגוריות
+    const colorPalette = [
+        { bg: '#ebf8ff', text: '#2b6cb0', border: '#4299e1' }, // כחול
+        { bg: '#f0fff4', text: '#276749', border: '#48bb78' }, // ירוק
+        { bg: '#fff5f5', text: '#c53030', border: '#f56565' }, // אדום-ורדרד
+        { bg: '#faf5ff', text: '#6b46c1', border: '#9f7aea' }, // סגול
+        { bg: '#fffaf0', text: '#c05621', border: '#ed8936' }, // כתום
+        { bg: '#e6fffa', text: '#285e61', border: '#38b2ac' }, // טורקיז
+        { bg: '#fff5f7', text: '#b83280', border: '#ed64a6' }, // מג'נטה
+        { bg: '#fefcbf', text: '#975a16', border: '#ecc94b' }, // צהוב-חרדל
+        { bg: '#edf2f7', text: '#2d3748', border: '#718096' }, // אפור-כחלחל
+        { bg: '#ebf4ff', text: '#3c366b', border: '#667eea' }  // אינדיגו
+    ];
+
+    const fileInput = document.getElementById('fileInput');
+    const searchInput = document.getElementById('searchInput');
+    const categoriesContainer = document.getElementById('categoriesContainer');
+    const recipesGrid = document.getElementById('recipesGrid');
+    const recipeModal = document.getElementById('recipeModal');
+    const modalContent = document.getElementById('modalContent');
+    const closeModal = document.getElementById('closeModal');
+
+    // טעינה מהזיכרון המקומי בעת פתיחת הדף
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedData = localStorage.getItem('my_recipes_data');
+        if (savedData) {
+            allRecipes = JSON.parse(savedData);
+            prepareDataAndRender();
+        } else {
+            showEmptyState('עדיין לא נטענו מתכונים. לחץ על הכפתור למעלה כדי לטעון קובץ טקסט.');
+        }
+    });
+
+    // קריאת קובץ טקסט
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const text = event.target.result;
+            allRecipes = parseRecipes(text);
+            localStorage.setItem('my_recipes_data', JSON.stringify(allRecipes));
+            currentCategory = 'הכל';
+            searchQuery = '';
+            searchInput.value = '';
+            prepareDataAndRender();
+        };
+        reader.readAsText(file, 'UTF-8');
+    });
+
+    // פיענוח הטקסט לקטגוריות ומתכונים
+    function parseRecipes(text) {
+        const lines = text.split(/\r?\n/);
+        const recipes = [];
+        let activeCategory = 'כללי';
+        let activeRecipe = null;
+
+        for (let line of lines) {
+            const trimmed = line.trim();
+
+            if (trimmed.startsWith('# ') && !trimmed.startsWith('## ')) {
+                if (activeRecipe) {
+                    activeRecipe.content = activeRecipe.content.trim();
+                    recipes.push(activeRecipe);
+                    activeRecipe = null;
+                }
+                activeCategory = trimmed.substring(2).trim();
+            } else if (trimmed.startsWith('## ')) {
+                if (activeRecipe) {
+                    activeRecipe.content = activeRecipe.content.trim();
+                    recipes.push(activeRecipe);
+                }
+                activeRecipe = {
+                    title: trimmed.substring(3).trim(),
+                    category: activeCategory,
+                    content: ''
+                };
+            } else if (activeRecipe) {
+                activeRecipe.content += line + '\n';
+            }
+        }
+
+        if (activeRecipe) {
+            activeRecipe.content = activeRecipe.content.trim();
+            recipes.push(activeRecipe);
+        }
+
+        return recipes;
+    }
+
+    // מיון לפי א"ב והקצאת צבע לכל קטגוריה
+    function prepareDataAndRender() {
+        // מיון המתכונים: קודם לפי קטגוריה (א"ב) ואז לפי שם המתכון (א"ב)
+        allRecipes.sort((a, b) => {
+            const catCompare = a.category.localeCompare(b.category, 'he');
+            if (catCompare !== 0) return catCompare;
+            return a.title.localeCompare(b.title, 'he');
+        });
+
+        // איסוף קטגוריות ייחודיות (כבר ממוינות) והקצאת צבע קבוע לכל אחת
+        const uniqueCategories = [...new Set(allRecipes.map(r => r.category))].sort((a, b) =>
+            a.localeCompare(b, 'he')
+        );
+
+        categoryColorMap = {};
+        uniqueCategories.forEach((cat, index) => {
+            categoryColorMap[cat] = colorPalette[index % colorPalette.length];
+        });
+
+        renderCategories(uniqueCategories);
+        renderRecipes();
+    }
+
+    // האזנה לחיפוש
+    searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        renderRecipes();
+    });
+
+    // יצירת כפתורי קטגוריות ממוינים וצבעוניים
+    function renderCategories(sortedUniqueCategories) {
+        categoriesContainer.innerHTML = '';
+        if (allRecipes.length === 0) return;
+
+        const categories = ['הכל', ...sortedUniqueCategories];
+
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'cat-btn';
+            btn.textContent = cat;
+
+            const isSelected = cat === currentCategory;
+
+            if (cat === 'הכל') {
+                if (isSelected) {
+                    btn.style.backgroundColor = 'var(--primary)';
+                    btn.style.color = '#ffffff';
+                    btn.style.borderColor = 'var(--primary)';
+                }
+            } else {
+                const colors = categoryColorMap[cat];
+                if (isSelected) {
+                    btn.style.backgroundColor = colors.border;
+                    btn.style.color = '#ffffff';
+                    btn.style.borderColor = colors.border;
+                } else {
+                    btn.style.backgroundColor = colors.bg;
+                    btn.style.color = colors.text;
+                    btn.style.borderColor = colors.border;
+                }
+            }
+
+            btn.onclick = () => {
+                currentCategory = cat;
+                renderCategories(sortedUniqueCategories);
+                renderRecipes();
+            };
+            categoriesContainer.appendChild(btn);
+        });
+    }
+
+    // הצגת כרטיסיות המתכונים
+    function renderRecipes() {
+        recipesGrid.innerHTML = '';
+
+        const filtered = allRecipes.filter(recipe => {
+            const matchesCat = currentCategory === 'הכל' || recipe.category === currentCategory;
+            const matchesSearch = recipe.title.toLowerCase().includes(searchQuery) ||
+                                  recipe.content.toLowerCase().includes(searchQuery);
+            return matchesCat && matchesSearch;
+        });
+
+        if (filtered.length === 0) {
+            showEmptyState('לא נמצאו מתכונים התואמים לחיפוש.');
+            return;
+        }
+
+        filtered.forEach(recipe => {
+            const colors = categoryColorMap[recipe.category] || colorPalette[0];
+            const card = document.createElement('div');
+            card.className = 'recipe-card';
+            card.style.borderTopColor = colors.border;
+
+            card.innerHTML = `
+                <div>
+                    <span class="recipe-category-badge" style="background-color: ${colors.bg}; color: ${colors.text}; border: 1px solid ${colors.border};">
+                        ${escapeHtml(recipe.category)}
+                    </span>
+                    <div class="recipe-title">${escapeHtml(recipe.title)}</div>
+                </div>
+                <div class="recipe-preview">${escapeHtml(recipe.content)}</div>
+            `;
+            card.onclick = () => openRecipeModal(recipe);
+            recipesGrid.appendChild(card);
+        });
+    }
+
+    function showEmptyState(message) {
+        recipesGrid.innerHTML = `<div class="empty-state">${message}</div>`;
+    }
+
+    // ניהול חלון מתכון מלא
+    function openRecipeModal(recipe) {
+        const colors = categoryColorMap[recipe.category] || colorPalette[0];
+        const modalBadge = document.getElementById('modalCategory');
+
+        modalContent.style.borderTopColor = colors.border;
+        modalBadge.textContent = recipe.category;
+        modalBadge.style.backgroundColor = colors.bg;
+        modalBadge.style.color = colors.text;
+        modalBadge.style.border = `1px solid ${colors.border}`;
+
+        document.getElementById('modalTitle').textContent = recipe.title;
+        document.getElementById('modalBody').textContent = recipe.content;
+        recipeModal.classList.add('open');
+    }
+
+    closeModal.onclick = () => recipeModal.classList.remove('open');
+    recipeModal.onclick = (e) => {
+        if (e.target === recipeModal) recipeModal.classList.remove('open');
+    };
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') recipeModal.classList.remove('open');
+    });
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+</script>
+
+</body>
+</html>
