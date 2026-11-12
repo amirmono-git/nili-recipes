@@ -35,18 +35,9 @@
         }
 
         header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 15px;
             margin-bottom: 25px;
             padding-bottom: 20px;
             border-bottom: 2px solid var(--border-color);
-        }
-
-        .header-text {
-            flex: 1 1 600px;
         }
 
         h1 {
@@ -60,28 +51,6 @@
             font-weight: 400;
             color: var(--text-muted);
             line-height: 1.6;
-        }
-
-        .file-upload-btn {
-            background-color: var(--primary);
-            color: white;
-            padding: 10px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: background-color 0.2s;
-            display: inline-block;
-            white-space: nowrap;
-            margin-top: 4px;
-        }
-
-        .file-upload-btn:hover {
-            background-color: var(--primary-hover);
-        }
-
-        input[type="file"] {
-            display: none;
         }
 
         .controls {
@@ -177,7 +146,6 @@
             overflow: hidden;
         }
 
-        /* תצוגת מתכון מלא (Modal) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -250,14 +218,8 @@
 
 <div class="container">
     <header>
-        <div class="header-text">
-            <h1>ספר המתכונים של נילי</h1>
-            <h2>ברוכים הבאים לספר המתכונים המאוגד של נילי. ספר זה מרכז את המתכונים הביתיים, האהובים והעשירים של נילי, כפי שנכתבו ונשמרו בכתב יד. המתכונים בספר זה מביאים עמם את הניחוחות, הזיכרונות והטעמים של המטבח הביתי החם, תוך ארגון מחדש במבנה מודרני, ברור ומדויק.</h2>
-        </div>
-        <label class="file-upload-btn">
-            טען קובץ מתכונים (.txt / .md)
-            <input type="file" id="fileInput" accept=".txt,.md">
-        </label>
+        <h1>ספר המתכונים של נילי</h1>
+        <h2>ברוכים הבאים לספר המתכונים המאוגד של נילי. ספר זה מרכז את המתכונים הביתיים, האהובים והעשירים של נילי, כפי שנכתבו ונשמרו בכתב יד. המתכונים בספר זה מביאים עמם את הניחוחות, הזיכרונות והטעמים של המטבח הביתי החם, תוך ארגון מחדש במבנה מודרני, ברור ומדויק.</h2>
     </header>
 
     <div class="controls">
@@ -279,26 +241,26 @@
 </div>
 
 <script>
+    const RECIPES_FILE_URL = './recipes.txt';
+
     let allRecipes = [];
     let currentCategory = 'הכל';
     let searchQuery = '';
     let categoryColorMap = {};
 
-    // פלטת צבעים נעימה וקריאה לקטגוריות
     const colorPalette = [
-        { bg: '#ebf8ff', text: '#2b6cb0', border: '#4299e1' }, // כחול
-        { bg: '#f0fff4', text: '#276749', border: '#48bb78' }, // ירוק
-        { bg: '#fff5f5', text: '#c53030', border: '#f56565' }, // אדום-ורדרד
-        { bg: '#faf5ff', text: '#6b46c1', border: '#9f7aea' }, // סגול
-        { bg: '#fffaf0', text: '#c05621', border: '#ed8936' }, // כתום
-        { bg: '#e6fffa', text: '#285e61', border: '#38b2ac' }, // טורקיז
-        { bg: '#fff5f7', text: '#b83280', border: '#ed64a6' }, // מג'נטה
-        { bg: '#fefcbf', text: '#975a16', border: '#ecc94b' }, // צהוב-חרדל
-        { bg: '#edf2f7', text: '#2d3748', border: '#718096' }, // אפור-כחלחל
-        { bg: '#ebf4ff', text: '#3c366b', border: '#667eea' }  // אינדיגו
+        { bg: '#ebf8ff', text: '#2b6cb0', border: '#4299e1' },
+        { bg: '#f0fff4', text: '#276749', border: '#48bb78' },
+        { bg: '#fff5f5', text: '#c53030', border: '#f56565' },
+        { bg: '#faf5ff', text: '#6b46c1', border: '#9f7aea' },
+        { bg: '#fffaf0', text: '#c05621', border: '#ed8936' },
+        { bg: '#e6fffa', text: '#285e61', border: '#38b2ac' },
+        { bg: '#fff5f7', text: '#b83280', border: '#ed64a6' },
+        { bg: '#fefcbf', text: '#975a16', border: '#ecc94b' },
+        { bg: '#edf2f7', text: '#2d3748', border: '#718096' },
+        { bg: '#ebf4ff', text: '#3c366b', border: '#667eea' }
     ];
 
-    const fileInput = document.getElementById('fileInput');
     const searchInput = document.getElementById('searchInput');
     const categoriesContainer = document.getElementById('categoriesContainer');
     const recipesGrid = document.getElementById('recipesGrid');
@@ -306,36 +268,31 @@
     const modalContent = document.getElementById('modalContent');
     const closeModal = document.getElementById('closeModal');
 
-    // טעינה מהזיכרון המקומי בעת פתיחת הדף
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+        // הצגה מיידית מהמטמון המקומי אם קיים
         const savedData = localStorage.getItem('my_recipes_data');
         if (savedData) {
             allRecipes = JSON.parse(savedData);
             prepareDataAndRender();
         } else {
-            showEmptyState('עדיין לא נטענו מתכונים. לחץ על הכפתור למעלה כדי לטעון קובץ טקסט.');
+            showEmptyState('טוען מתכונים...');
+        }
+
+        // משיכת הגרסה העדכנית מקובץ הטקסט (עוקף cache של הדפדפן)
+        try {
+            const response = await fetch(`${RECIPES_FILE_URL}?t=${Date.now()}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const text = await response.text();
+            allRecipes = parseRecipes(text);
+            localStorage.setItem('my_recipes_data', JSON.stringify(allRecipes));
+            prepareDataAndRender();
+        } catch (err) {
+            if (!savedData) {
+                showEmptyState('לא ניתן לטעון את קובץ המתכונים (recipes.txt).');
+            }
         }
     });
 
-    // קריאת קובץ טקסט
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const text = event.target.result;
-            allRecipes = parseRecipes(text);
-            localStorage.setItem('my_recipes_data', JSON.stringify(allRecipes));
-            currentCategory = 'הכל';
-            searchQuery = '';
-            searchInput.value = '';
-            prepareDataAndRender();
-        };
-        reader.readAsText(file, 'UTF-8');
-    });
-
-    // פיענוח הטקסט לקטגוריות ומתכונים
     function parseRecipes(text) {
         const lines = text.split(/\r?\n/);
         const recipes = [];
@@ -375,16 +332,13 @@
         return recipes;
     }
 
-    // מיון לפי א"ב והקצאת צבע לכל קטגוריה
     function prepareDataAndRender() {
-        // מיון המתכונים: קודם לפי קטגוריה (א"ב) ואז לפי שם המתכון (א"ב)
         allRecipes.sort((a, b) => {
             const catCompare = a.category.localeCompare(b.category, 'he');
             if (catCompare !== 0) return catCompare;
             return a.title.localeCompare(b.title, 'he');
         });
 
-        // איסוף קטגוריות ייחודיות (כבר ממוינות) והקצאת צבע קבוע לכל אחת
         const uniqueCategories = [...new Set(allRecipes.map(r => r.category))].sort((a, b) =>
             a.localeCompare(b, 'he')
         );
@@ -398,13 +352,11 @@
         renderRecipes();
     }
 
-    // האזנה לחיפוש
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value.toLowerCase().trim();
         renderRecipes();
     });
 
-    // יצירת כפתורי קטגוריות ממוינים וצבעוניים
     function renderCategories(sortedUniqueCategories) {
         categoriesContainer.innerHTML = '';
         if (allRecipes.length === 0) return;
@@ -446,7 +398,6 @@
         });
     }
 
-    // הצגת כרטיסיות המתכונים
     function renderRecipes() {
         recipesGrid.innerHTML = '';
 
@@ -486,7 +437,6 @@
         recipesGrid.innerHTML = `<div class="empty-state">${message}</div>`;
     }
 
-    // ניהול חלון מתכון מלא
     function openRecipeModal(recipe) {
         const colors = categoryColorMap[recipe.category] || colorPalette[0];
         const modalBadge = document.getElementById('modalCategory');
